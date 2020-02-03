@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Nov 24 23:03:39 2019
+
+@author: Maximilian
+"""
+
+# =============================================================================
+# (Fake)News Classification Project
+# =============================================================================
+https://medium.com/sculpt/a-technique-for-building-nlp-classifiers-efficiently-with-transfer-learning-and-weak-supervision-a8e2f21ca9c8
