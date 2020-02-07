@@ -331,31 +331,31 @@ class DTM():
       
         # for unigrams
         if ngram_length == 1:
-            unigrams_sentences= []
-            for doc in raw_data:
-                temp = " ".join(doc)
-                unigrams_sentences.append(temp)  
-            self.unigrams = unigrams_sentences
+          unigrams_sentences= []
+          for doc in raw_data:
+              temp = " ".join(doc)
+              unigrams_sentences.append(temp)  
+          self.unigrams = unigrams_sentences
         
         # for bigrams
-        elif ngram_length == 2:
-            bigrams_dot = []
-            for doc in raw_data:
-                new_doc = []
-                for tup in doc:
-                    new_doc.append(str(tup[0]) + '.' + str(tup[1]))
-                    bigrams_dot.append(new_doc)   
+        if ngram_length == 2:
+          bigrams_dot = []
+          for doc in raw_data:
+              new_doc = []
+              for tup in doc:
+                  new_doc.append(str(tup[0]) + '.' + str(tup[1]))
+              bigrams_dot.append(new_doc)   
               
-            bigrams_dot_sentences= []
-            for doc in bigrams_dot:
-                temp = " ".join(doc)
-                bigrams_dot_sentences.append(temp)
-            self.bigrams = bigrams_dot_sentences
-            self.bigram_tokens = bigrams_dot
+          bigrams_dot_sentences= []
+          for doc in bigrams_dot:
+              temp = " ".join(doc)
+              bigrams_dot_sentences.append(temp)
+          self.bigrams = bigrams_dot_sentences
+          self.bigram_tokens = bigrams_dot
         
         # if more than bigrams
         else:
-            raise ValueError("Specified ngram length currently not yet supported.")
+          raise ValueError("Specified ngram length currently not yet supported.")
       
       # if un-preprocessed text data is used
       else: 
