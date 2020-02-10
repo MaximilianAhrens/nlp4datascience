@@ -222,15 +222,24 @@ class BagOfWords():
     def visualize(self, weight):
         if weight == "tf":
             unigram_type = self.unigrams_tf
-            bigram_type = self.bigrams_tf
+            try:
+                bigram_type = self.bigrams_tf
+            except AttributeError:
+                pass
             ftitle = "term frequency ranking"
         if weight == "df":
             unigram_type = self.unigrams_df
-            bigram_type = self.bigrams_df
+            try:
+                bigram_type = self.bigrams_df
+            except AttributeError:
+                pass
             ftitle = "document frequency ranking"
         if weight == "tf-idf":
             unigram_type = self.unigrams_tf_idf
-            bigram_type = self.bigrams_tf_idf
+            try:
+                bigram_type = self.bigrams_tf_idf
+            except AttributeError:
+                pass
             ftitle = "tf-idf-ranking"
             
         if self.ngram_length == 1:
