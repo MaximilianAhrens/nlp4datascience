@@ -240,7 +240,7 @@ class BagOfWords():
                 bigram_type = self.bigrams_tf_idf
             except AttributeError:
                 pass
-            ftitle = "tf-idf-ranking"
+            ftitle = "tf-idf ranking"
             
         if self.ngram_length == 1:
             f = plt.figure()
@@ -263,14 +263,26 @@ class BagOfWords():
     def visualize_adj(self, weight):
         if weight == "tf":
             unigram_type = self.unigrams_tf_adj
-            bigram_type = self.bigrams_tf_adj
+            try:
+                bigram_type = self.bigrams_tf_adj
+            except AttributeError:
+                pass
             ftitle = "term frequency ranking"
         if weight == "df":
             unigram_type = self.unigrams_df_adj
-            bigram_type = self.bigrams_df_adj
+            try:
+                bigram_type = self.bigrams_df_adj
+            except AttributeError:
+                pass
             ftitle = "document frequency ranking"
         if weight == "tf-idf":
             unigram_type = self.unigrams_tf_idf_adj
+            try:
+                bigram_type = self.bigrams_tf_idf_adj
+            except AttributeError:
+                pass
+            ftitle = "tf-idf ranking"                
+                
             bigram_type = self.bigrams_tf_idf_adj
             ftitle = "tf-idf-ranking"
             
