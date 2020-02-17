@@ -4,27 +4,22 @@ import numpy as np
 import time
 from tqdm import tqdm
 tqdm.pandas(desc="Progress:")
-
 from string import digits
 import itertools
 import collections
 import nltk
-
 try:
     nltk.data.find('corpora/wordnet.zip')
 except LookupError:
     print("NLTK wordnet data package not yet installed. Download initiated.")
     nltk.download('wordnet')
-    import nltk
-    
+    import nltk   
 from nltk.util import ngrams
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 from nltk.stem import WordNetLemmatizer 
-
 from sklearn.feature_extraction.text import CountVectorizer
-#from sklearn.feature_extraction.text import TfidfVectorizer
-#from sklearn.feature_extraction.text import TfidfTransformer
+from gensim.models.phrases import Phrases, Phraser
 
 from nlp4datascience.datahandling.largepickle import pickle_dump
 
@@ -53,18 +48,20 @@ class BagOfWords():
         self.ngram_length = ngram_length
         self.ngram_connector = ngram_connector
         self.N = len(list(raw_data)) 
-        
+        self.raw_data = raw_data
+        self.custom_stopwords = list()
         if ngram_connector == "." or ngram_connector == "," or ngram_connector == "_":
           pass
         else:
           raise ValueError("invalid input for ngram_connector. ""."" or "","" allowed. ")
-          
+    
+    def clean(self, remove_numbers=True):
         # removing stopwords (NLTK stopword list)
-        self.stop_words = stopwords.words('english')+stopwords.words('french')+stopwords.words('german')
-        print("\n\n1/3: Stopword removal\n\n:")
-        corpus = raw_data.progress_apply(lambda x: " ".join(x for x in x.split() if x not in self.stop_words))
+        self.stop_words = stopwords.words('english')+stopwords.words('french')+stopwords.words('german')+self.custom_stopwords
+        print("\n\n1/3: Stopword removal\n")
+        corpus = self.raw_data.progress_apply(lambda x: " ".join(x for x in x.split() if x not in self.stop_words))
         # lowercasing
-        print("\n\n2/3: Lowercasing\n\n:")
+        print("\n\n2/3: Lowercasing\n")
         corpus = corpus.progress_apply(lambda x: " ".join(x.lower() for x in x.split())) 
         # removing punctuation
         corpus = corpus.str.replace('[^\w\s]','')
@@ -72,10 +69,12 @@ class BagOfWords():
         corpus = corpus.str.replace('â','')
         corpus = corpus.str.replace('ô','')
         # removing numbers
-        remove_digits = str.maketrans('', '', digits)
-        print("\n\n3/3: Removing numbers\n\n:")
-        self.corpus = corpus.progress_apply(lambda x: x.translate(remove_digits))
-    
+        if remove_numbers == True:
+            remove_digits = str.maketrans('', '', digits)
+            print("3/3: Removing numbers\n")
+            self.corpus = corpus.progress_apply(lambda x: x.translate(remove_digits))
+        else:
+            self.corpus = corpus   
     
     def tokenize(self):
         # tokenizing
@@ -134,7 +133,7 @@ class BagOfWords():
             self.bigrams = bigrams
             self.bigrams_unadjust = bigrams.copy()
     
-    def weighted_ngrams(self, ngram_type):
+    def ngrams(self, ngram_type):
         if ngram_type == "unigrams":
             ngram_list = self.unigrams
         if ngram_type == "bigrams":
@@ -339,78 +338,35 @@ class DTM():
     
     binDTM is either True or False. True creates an additional binary DTM.
     '''
-    
-    def __init__(self, raw_data, ngram_length, nlp4datascience2sklearn=True,
-                 tfidfDTM=False, binDTM=False):
+ 
+    def __init__(self, raw_data, tfidfDTM=False, binDTM=False):
+        
       # core attributes
-      self.ngram_length = ngram_length
-      self.nlp4datascience2sklearn = nlp4datascience2sklearn
+      #self.ngram_length = ngram_length
+      self.raw_data = raw_data
       
-      # check whether data is already preprocessed via nlp4datascience
-      if self.nlp4datascience2sklearn == True:
-      
-        # for unigrams
-        if ngram_length == 1:
-            unigrams_sentences= []
-            for doc in raw_data:
-                temp = " ".join(doc)
-                unigrams_sentences.append(temp)  
-            self.unigrams = unigrams_sentences
-        
-        # for bigrams
-        elif ngram_length == 2:
-            bigrams_dot = []
-            for doc in raw_data:
-                new_doc = []
-                for tup in doc:
-                    new_doc.append(str(tup[0]) + '.' + str(tup[1]))
-                    bigrams_dot.append(new_doc)   
-              
-            bigrams_dot_sentences= []
-            for doc in bigrams_dot:
-                temp = " ".join(doc)
-                bigrams_dot_sentences.append(temp)
-            self.bigrams = bigrams_dot_sentences
-            self.bigram_tokens = bigrams_dot
-        
-        # if more than bigrams
-        else:
-            raise ValueError("Specified ngram length currently not yet supported.")
-      
-      # if un-preprocessed text data is used
-      else: 
-        if ngram_length == 1:
-          self.ngrams = raw_data
-        if ngram_length == 2:
-          self.ngrams = raw_data         
-        else:
-          raise ValueError("Specified ngram length currently not yet supported.")
-    
-    
     def create_dtm(self, ngrams):
       '''
       Create a document-term-matrix
-      '''
-      if self.nlp4datascience2sklearn == True:
-        
-        # define preprocessor and tokenizer for sklearn DTM vectorizer  
-        def no_preprocessing(doc):
+      '''       
+      # define preprocessor and tokenizer for sklearn DTM vectorizer  
+      def no_preprocessing(doc):
           pass
           return(doc)
-        
-        def no_tokenizing(corpus):
+      
+      def no_tokenizing(corpus):
           pass
           return(corpus)
-        
-        # define DTM vectorizer
-        count_vectorizer = CountVectorizer(lowercase = False,
-                                   preprocessor=no_preprocessing,
-                                   tokenizer=no_tokenizing,
-                                   stop_words= None,
-                                   analyzer = "word",
-                                   ngram_range=(1,1)
-                                   )
-        self.countvectorizer = count_vectorizer
+      
+      # define DTM vectorizer
+      count_vectorizer = CountVectorizer(lowercase = False,
+                               preprocessor=no_preprocessing,
+                               tokenizer=no_tokenizing,
+                               stop_words= None,
+                               analyzer = "word",
+                               ngram_range=(1,1)
+                               )
+      self.countvectorizer = count_vectorizer
         
       # create the DTM
       start_time = time.time()
@@ -422,7 +378,40 @@ class DTM():
       # define the tokens
       tokens = count_vectorizer.get_feature_names()
       self.tokens = tokens
-                 
+              
+    def unigram_dtm(self):
+        self.create_dtm(self.raw_data)
+                
+    def bigram_dtm_naive(self): # create each combination of 2 unigrams. Requires creation of bigrams with BagOfWords class above.
+        self.create_dtm(self.raw_data)    
+        
+    def bigram_dtm(self, min_count=5, threshold=10): # feed in unigrams to detect bigrams via collocation method
+        bigram_model = Phrases(self.raw_data, min_count=min_count, threshold=threshold, delimiter=b' ')
+        bigram_model_final = Phraser(bigram_model)
+        bigrams_list = [0]*self.raw_data.shape[0]
+        for i, doc in enumerate(tqdm(self.raw_data)):
+            bigrams_list[i] = bigram_model_final[doc]
+        self.bigrams = bigrams_list
+        self.create_dtm(self.bigrams)
+
+    def ngram_dtm(self, min_count=5, threshold=10):
+        if hasattr(self, 'bigrams'):
+            ngram_model = Phrases(self.bigrams, min_count=min_count, threshold=threshold, delimiter=b' ')
+            ngram_model_final = Phraser(ngram_model)
+            ngrams_list = [0]*self.raw_data.shape[0]
+            for i, doc in enumerate(tqdm(self.bigrams)):
+                ngrams_list[i] = ngram_model_final[doc]
+            self.ngrams = ngrams_list
+        else:
+            self.bigram_dtm()
+            ngram_model = Phrases(self.bigrams, min_count=min_count, threshold=threshold, delimiter=b' ')
+            ngram_model_final = Phraser(ngram_model)
+            ngrams_list = [0]*self.raw_data.shape[0]
+            for i, doc in enumerate(tqdm(self.bigrams)):
+                ngrams_list[i] = ngram_model_final[doc]
+            self.ngrams = ngrams_list
+        self.create_dtm(self.ngrams)
+
 
     def sparsify(self, DTM, cut_off = 0.1):
       '''
@@ -435,6 +424,7 @@ class DTM():
       new_dict = old_dict[:cut_off_threshold]
       DTM_sparsified = DTM[new_dict.index]
       return(DTM_sparsified)      
+  
 
 
 # =============================================================================
@@ -469,120 +459,6 @@ class WordVectors():
         del self.word2vec   
     
 
-# =============================================================================
-#     # TBD# 
-#     def bigram2vec(self, vector_dim = 200, min_count = 1):
-#         '''
-#         size (int, optional) – Dimensionality of the word vectors.
-#         min_count (int, optional) – Ignores all words with total frequency lower than this.
-#         '''
-#         bigram_transformer = Phrases(common_texts)
-#         model = Word2Vec(bigram_transformer[common_texts], min_count=1)
-#         
-#         
-#     # tbd    
-#     def glovevec(self):
-#         pass
-#     
-#     # tbd
-#     def bertvec(self):
-#         pass
-# =============================================================================
-        
 
-
-  
-      
-
-
-# =============================================================================
-# Further documentation
-# =============================================================================
-### --> see also: https://stanford.edu/~rjweiss/public_html/IRiSS2013/text2/notebooks/cleaningtext.html
-
-
-        
-# =============================================================================
-# WORK IN PROGRESS: ADDITIONAL OPTIONS
-# =============================================================================
-
-        
-    # choose tokenizer
-        
-# =============================================================================
-#     def my_preprocessor(doc):
-#         #corpus = unescape(doc).lower()
-#         corpus = unescape(doc)
-#         return corpus
-#     
-#     def my_tokenizer(corpus):
-#         # create a spaCy tokenizer
-#         spacy.load("en_core_web_sm")
-#         lemmatizer = spacy.lang.en.English()
-#         tokens = lemmatizer(corpus)
-#         return([token.lemma_ for token in tokens])
-#         
-#         
-#     count_vectorizer = CountVectorizer(preprocessor=my_preprocessor,
-#                                  tokenizer=my_tokenizer,
-#                                  ngram_range=(1,1),
-#                                  #stop_words='english'
-#                                  )
-# =============================================================================
-        
- # =============================================================================
-#     # Word-Matrix to Dataframe
-#     def wm2df(wm, feat_names): 
-#         # create an index for each row
-#         doc_names = ['Doc{:d}'.format(idx) for idx, _ in enumerate(wm)]
-#         df = pd.DataFrame(data=wm.toarray(), index=doc_names,
-#                           columns=feat_names)
-#         return(df)
-# =============================================================================   
-    
-    
-# =============================================================================
-#         start_time = time.time()
-#         dtm_count = count_vectorizer.fit_transform(raw_data)
-#         print("--- %s seconds ---" % round((time.time() - start_time),4))
-#         print("Dimension of document-term-maxtrix (counts):", dtm_count.shape)
-#         self.count = dtm_count
-#         self.shape = dtm_count.shape
-#         self.toarray = dtm_count.toarray
-#         
-#         tokens = count_vectorizer.get_feature_names()
-#         #wm2df(dtm_count, tokens)
-#         #word2id = dict((v, idx) for idx, v in enumerate(tokens))
-#         self.tokens = tokens
-#         
-#         if tfidfDTM==True:
-#             # term frequencies (count/doc-length)
-#             tf_transformer = TfidfTransformer(use_idf=False)
-#             dtm_tf = tf_transformer.fit_transform(dtm_count)
-#             dtm_tf.shape
-#             self.tf = dtm_tf
-#             
-#             # tf-idf score
-#             tfidf_transformer = TfidfTransformer(use_idf=True)
-#             dtm_tfidf = tfidf_transformer.fit_transform(dtm_count)
-#             dtm_tfidf.shape
-#             self.tfidf = dtm_tfidf
-# 
-#         if binDTM==True:
-#             # word occurences (binary dtm)
-#             bin_vectorizer = CountVectorizer(preprocessor=my_preprocessor,
-#                                      tokenizer=my_tokenizer,
-#                                      ngram_range=(1,1),
-#                                      #stop_words='english',
-#                                      binary = True
-#                                      )
-# 
-#             start_time = time.time()
-#             dtm_bin = bin_vectorizer.fit_transform(raw_data)
-#             print("--- %s seconds ---" % round((time.time() - start_time),4))
-#             print("Dimension of document-term-maxtrix (counts):", dtm_bin.shape)
-#             self.bin = dtm_bin
-# =============================================================================
-       
 
 
