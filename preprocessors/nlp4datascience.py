@@ -91,6 +91,7 @@ class BagOfWords():
         # removing stopwords from stems
         self.stems = [[word for word in doc if word not in self.stop_words] for doc in tqdm(self.stems)]
         self.unigrams = self.stems
+        self.unigrams_unadjust = self.stems.copy()
         # count frequency of unigrams
         self.unigrams_all = [item for sublist in self.unigrams for item in sublist]
         # check for bigrams        
@@ -106,7 +107,7 @@ class BagOfWords():
             # count frequency of bigrams
             self.bigrams_all = [item for sublist in bigrams for item in sublist]
             self.bigrams = bigrams
-        
+            self.bigrams_unadjust = bigrams.copy()       
     
     def lemmatize(self):
         print("\n\nCreating unigrams\n\n:")
@@ -115,6 +116,7 @@ class BagOfWords():
         # removing stopwords from stems
         self.lemmas = [[word for word in doc if word not in self.stop_words] for doc in tqdm(self.lemmas)]
         self.unigrams = self.lemmas
+        self.unigrams_unadjust = self.lemmas.copy()        
         # count frequency of unigrams
         self.unigrams_all = [item for sublist in self.unigrams for item in sublist]
         # check for bigrams  
@@ -130,7 +132,7 @@ class BagOfWords():
             # count frequency of bigrams
             self.bigrams_all = [item for sublist in bigrams for item in sublist]
             self.bigrams = bigrams
-     
+            self.bigrams_unadjust = bigrams.copy()
     
     def weighted_ngrams(self, ngram_type):
         if ngram_type == "unigrams":
@@ -186,8 +188,8 @@ class BagOfWords():
             elif rank == "tf-idf":
                 to_remove = set([t[0] for t in self.unigrams_tf_idf if t[1] <= cutoff])
             elif rank == "df":
-                to_remove = set([t[0] for t in self.unigrams_df if t[1] <= cutoff])    
-            self.unigrams_adj = list(map(remove, self.unigrams))
+                to_remove = set([t[0] for t in self.unigrams_df if t[1] <= cutoff])
+            self.unigrams = list(map(remove, self.unigrams))
             self.unigrams_tf_adj = [t for t in self.unigrams_tf if t[0] not in to_remove]
             self.unigrams_df_adj = [t for t in self.unigrams_df if t[0] not in to_remove]
             self.unigrams_tf_idf_adj = [t for t in self.unigrams_tf_idf if t[0] not in to_remove]
@@ -195,7 +197,7 @@ class BagOfWords():
             print("Total number of all unique unigrams:", len(set(self.unigrams_all)))
             print("Total number of all unigrams:", len(self.unigrams_all))
               
-            self.unigrams_all_adj = [item for sublist in self.unigrams_adj for item in sublist]
+            self.unigrams_all_adj = [item for sublist in self.unigrams for item in sublist]
             print("Total number of all unique unigrams after document-occurance cut-off:", len(set(self.unigrams_all_adj)))
             print("Total number of all unigrams after document-occurance cut-off:", len(self.unigrams_all_adj))
 
@@ -206,7 +208,7 @@ class BagOfWords():
                 to_remove = set([t[0] for t in self.bigrams_tf_idf if t[1] <= cutoff])
             elif rank == "df":
                 to_remove = set([t[0] for t in self.bigrams_df if t[1] <= cutoff])    
-            self.bigrams_adj = list(map(remove, self.bigrams))
+            self.bigrams = list(map(remove, self.bigrams))
             self.bigrams_tf_adj = [t for t in self.bigrams_tf if t[0] not in to_remove]
             self.bigrams_df_adj = [t for t in self.bigrams_df if t[0] not in to_remove]
             self.bigrams_tf_idf_adj = [t for t in self.bigrams_tf_idf if t[0] not in to_remove]
@@ -214,7 +216,7 @@ class BagOfWords():
             print("Total number of all unique bigrams:", len(set(self.bigrams_all)))
             print("Total number of all bigrams:", len(self.bigrams_all))
             
-            self.bigrams_all_adj = [item for sublist in self.bigrams_adj for item in sublist]
+            self.bigrams_all_adj = [item for sublist in self.bigrams for item in sublist]
             print("Total number of all unique bigrams after document-occurance cut-off:", len(set(self.bigrams_all_adj)))
             print("Total number of all bigrams after document-occurance cut-off:", len(self.bigrams_all_adj))
 
@@ -282,9 +284,6 @@ class BagOfWords():
             except AttributeError:
                 pass
             ftitle = "tf-idf ranking"                
-                
-            bigram_type = self.bigrams_tf_idf_adj
-            ftitle = "tf-idf-ranking"
             
         if self.ngram_length == 1:
             f = plt.figure()
@@ -305,13 +304,13 @@ class BagOfWords():
 
     def save(self, data_format, output_dir, file_name): # save preprocessed dataset
         results = pd.DataFrame()
-        results["uni"] = self.unigrams
-        results["uni_adj"] = self.unigrams_adj
+        results["uni"] = self.unigrams_unadjust
+        results["uni_adj"] = self.unigrams
         
         try:
             len(self.bigrams)
-            results["bi"] = self.bigrams
-            results["bi_adj"] = self.bigrams_adj
+            results["bi"] = self.bigrams_unadjust
+            results["bi_adj"] = self.bigrams
         except AttributeError:
             pass
             
