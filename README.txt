@@ -1,9 +1,11 @@
 This is a python (and cython) based toolbox that enables data analysis and time-series predictions based on numerical and textual data inputs.
-A range of machine learning (ML) methods are implemented for the pattern identification task.
+A range of machine learning (ML) methods are being implemented for regression and classification tasks.
+
+=== CURRENTLY IN EARLY BETA MODE ===
 
 #######################################################################
 MODELS
-The following ML methods are currently being implemented:
+The following ML methods are being implemented:
 	- OLS linear regression
 	- LASSO
 	- Elastic-Net
@@ -25,11 +27,6 @@ inference of the posterior distribution:
 	- Gibbs sampling
 	- Stochastic Variational Inference with Online Learning
 
-#######################################################################
-VISUALIZATION
-	- 
-
-
 
 For Feedback, please reach out to maximilian.ahrens@eng.ox.ac.uk or via the github account.
-COPYRIGHT: Maximilian Ahrens, 2019 | Oxford, UK
+COPYRIGHT: Maximilian Ahrens, 2020 | Oxford, UK
