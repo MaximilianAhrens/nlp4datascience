@@ -21,7 +21,7 @@ from nltk.stem import WordNetLemmatizer
 from sklearn.feature_extraction.text import CountVectorizer
 from gensim.models.phrases import Phrases, Phraser
 
-from nlp4datascience.datahandling.largepickle import pickle_dump
+from nlp4datascience.preprocessors.largepickle import pickle_dump
 
 # visualization
 import matplotlib.pyplot as plt
@@ -68,6 +68,7 @@ class BagOfWords():
         # removing special characters (can be extended)    
         corpus = corpus.str.replace('â','')
         corpus = corpus.str.replace('ô','')
+        corpus = corpus.str.replace('_',' ')
         # removing numbers
         if remove_numbers == True:
             remove_digits = str.maketrans('', '', digits)
@@ -244,14 +245,14 @@ class BagOfWords():
             ftitle = "tf-idf ranking"
             
         if self.ngram_length == 1:
-            f = plt.figure()
+            f = plt.figure(figsize = (14,8))
             f.suptitle(str(ftitle+" unigrams"))
             sp = f.add_subplot(111)
             sp.plot([x[1] for x in unigram_type])
             return f
           
         if self.ngram_length > 1:
-            f = plt.figure()
+            f = plt.figure(figsize = (14,8))
             sp = f.add_subplot(211)
             sp.plot([x[1] for x in unigram_type])
             plt.title(str(ftitle+" unigrams"))
