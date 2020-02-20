@@ -21,7 +21,7 @@ from nltk.stem import WordNetLemmatizer
 from sklearn.feature_extraction.text import CountVectorizer
 from gensim.models.phrases import Phrases, Phraser
 
-from nlp4datascience.preprocessors.largepickle import pickle_dump
+from nlp4datascience.datahandling.largepickle import pickle_dump
 
 # visualization
 import matplotlib.pyplot as plt
