@@ -1,3 +1,6 @@
+"""
+@author: Maximilian Ahrens, Oxford 2020 | maximilian.ahrens@outlook.com
+"""
 
 import pandas as pd
 import numpy as np
