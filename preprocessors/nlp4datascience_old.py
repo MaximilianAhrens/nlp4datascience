@@ -46,7 +46,7 @@ class BagOfWords():
     of (tf, df, tf-idf weighted) unigrams and bigrams easy and fast.
     '''
     
-    def __init__(self, raw_data, min_length, ngram_length, ngram_connector = "."):
+    def __init__(self, raw_data, min_length, ngram_length=2, ngram_connector = "."):
         self.min_length = min_length
         self.ngram_length = ngram_length
         self.ngram_connector = ngram_connector
@@ -137,11 +137,13 @@ class BagOfWords():
             self.bigrams = bigrams
             self.bigrams_unadjust = bigrams.copy()
     
-    def ngrams(self, ngram_type):
+    def ngrams(self, ngram_type, min_count = 10, threshild = 5, delimiter=b' '):
         if ngram_type == "unigrams":
             ngram_list = self.unigrams
         if ngram_type == "bigrams":
             ngram_list = self.bigrams
+        if ngram_type =="bigrams_colocation":
+            ngram_list = self.unigrams
 
         def tf_idf_compute(t):
             return (1 + np.log(counts[t]))*np.log(self.N/counts_d[t])
@@ -172,6 +174,33 @@ class BagOfWords():
                                      key=lambda x: x[1], reverse=True)
             self.bigrams_df = sorted(zip(unique_tokens, unsorted_df),
                                      key=lambda x: x[1], reverse=True)
+            
+# =============================================================================
+#         if ngram_type == "bigrams_colocation":
+#             bigram_model = Phrases(ngrams.uni_adj, min_count=20, threshold=10, delimiter=b' ')
+#             bigram_model_final = Phraser(bigram_model)
+#             ngrams_bi_w2v = [0]*ngrams.shape[0]
+#             for i, doc in enumerate(tqdm(ngrams.uni_adj)):
+#                 ngrams_bi_w2v[i] = bigram_model_final[doc]
+#             pd.Series(ngrams_bi_w2v).to_pickle('data/bitcoin_example/data/bigrams_w2v_nonagg_tf25.pkl')
+#             dtm_ngrams = DTM(ngrams_bi_w2v, ngram_length = 1)
+#             dtm_ngrams.create_dtm(ngrams_bi_w2v)
+#             print(len(dtm_ngrams.tokens))
+#             dtm_ngrams.dtm
+#             scipy.sparse.save_npz('C:/Users/oxmanahrens/OneDrive - Nexus365/BTR/data/bitcoin_example/data/dtm_bigrams_w2v_sparse_nonagg_tf25.npz', dtm_ngrams.dtm)
+#             pd.Series(dtm_ngrams.tokens).to_pickle('C:/Users/oxmanahrens/OneDrive - Nexus365/BTR/data/bitcoin_example/data/dtm_bigrams_w2v_tokens_nonagg_tf25.pkl')
+# 
+#             
+#             self.bigrams_tf = sorted(zip(unique_tokens, unsorted_tf),
+#                                      key=lambda x: x[1], reverse=True)
+#             self.bigrams_tf_idf = sorted(zip(unique_tokens, unsorted_tf_idf),
+#                                      key=lambda x: x[1], reverse=True)
+#             self.bigrams_df = sorted(zip(unique_tokens, unsorted_df),
+#                                      key=lambda x: x[1], reverse=True)     
+#             
+# =============================================================================
+            # create bigrams
+
           
     
     def rank_remove(self, rank, items, cutoff):
@@ -259,12 +288,9 @@ class BagOfWords():
             sp = f.add_subplot(211)
             sp.plot([x[1] for x in unigram_type])
             plt.title(str(ftitle+" unigrams"))
-            try:
-                sp2 = f.add_subplot(212)
-                sp2.plot([x[1] for x in bigram_type])
-                plt.title(str(ftitle+" bigrams"))
-            except UnboundLocalError:
-                pass
+            sp2 = f.add_subplot(212)
+            sp2.plot([x[1] for x in bigram_type])
+            plt.title(str(ftitle+" bigrams"))
         return f
                 
 
@@ -303,12 +329,9 @@ class BagOfWords():
             sp = f.add_subplot(211)
             sp.plot([x[1] for x in unigram_type])
             plt.title(str(ftitle+" unigrams"))
-            try:
-                sp2 = f.add_subplot(212)
-                sp2.plot([x[1] for x in bigram_type])
-                plt.title(str(ftitle+" bigrams"))
-            except UnboundLocalError:
-                pass
+            sp2 = f.add_subplot(212)
+            sp2.plot([x[1] for x in bigram_type])
+            plt.title(str(ftitle+" bigrams"))
         return f
 
     def save(self, data_format, output_dir, file_name): # save preprocessed dataset
