@@ -259,9 +259,12 @@ class BagOfWords():
             sp = f.add_subplot(211)
             sp.plot([x[1] for x in unigram_type])
             plt.title(str(ftitle+" unigrams"))
-            sp2 = f.add_subplot(212)
-            sp2.plot([x[1] for x in bigram_type])
-            plt.title(str(ftitle+" bigrams"))
+            try:
+                sp2 = f.add_subplot(212)
+                sp2.plot([x[1] for x in bigram_type])
+                plt.title(str(ftitle+" bigrams"))
+            except UnboundLocalError:
+                pass
         return f
                 
 
