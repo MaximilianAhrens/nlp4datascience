@@ -411,7 +411,7 @@ class DTM():
         '''
         input variables: output_dir, file_name
         '''
-        scipy.sparse.save_npz(output_dir + "/" * file_name +"_dtm.npz", self.dtm)
+        scipy.sparse.save_npz(output_dir + "/" + file_name +"_dtm.npz", self.dtm)
         pd.Series(self.tokens).to_pickle(output_dir + "/" * file_name + "_tokens.pkl")
         
 
