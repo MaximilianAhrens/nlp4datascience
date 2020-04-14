@@ -281,19 +281,21 @@ class BagOfWords():
             f = plt.figure()
             f.suptitle(str(ftitle+" unigrams"))
             sp = f.add_subplot(111)
-            sp.plot([x[1] for x in unigram_type])
+            sp.plot([x[1] for x in unigram_type], color ="r")
             return f
           
         if self.ngram_length > 1:
             f = plt.figure()
             sp = f.add_subplot(211)
-            sp.plot([x[1] for x in unigram_type])
-            plt.title(str(ftitle+" unigrams"))
+
+            sp.plot([x[1] for x in unigram_type],color ="r")
+            plt.title(str(ftitle+" unigrams after cut-off"))
             if hasattr(self,"bigrams_tf"):
                 sp2 = f.add_subplot(212)
-                sp2.plot([x[1] for x in bigram_type])
-                plt.title(str(ftitle+" bigrams"))
-        return f
+                sp2.plot([x[1] for x in bigram_type],color ="r")
+                plt.title(str(ftitle+" bigrams after cut-off"))
+            return f
+
 
     def save(self, data_format, output_dir, file_name): # save preprocessed dataset
         results = pd.DataFrame()
@@ -325,7 +327,8 @@ class DTM():
     be used as inputs.
     
     raw_data has to be in form of "preprocessed_data.unigrams or 
-    preprecessed_data.bigrams". It needs to be "."-connected for R-input.
+    preprecessed_data.bigrams". It may need to be "."-connected 
+    if used as input in R.
     
     binDTM is either True or False. True creates an additional binary DTM.
     '''
