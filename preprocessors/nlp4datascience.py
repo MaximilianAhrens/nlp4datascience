@@ -61,10 +61,10 @@ class BagOfWords():
     def clean(self, remove_numbers=True):
         # removing stopwords (NLTK stopword list)
         self.stop_words = stopwords.words('english')+stopwords.words('french')+stopwords.words('german')+self.custom_stopwords
-        print("\n\n1/3: Stopword removal\n")
+        print("\n\1/3: Stopword removal")
         corpus = self.raw_data.progress_apply(lambda x: " ".join(x for x in x.split() if x not in self.stop_words))
         # lowercasing
-        print("\n\n2/3: Lowercasing\n")
+        print("\n2/3: Lowercasing")
         corpus = corpus.progress_apply(lambda x: " ".join(x.lower() for x in x.split())) 
         # removing punctuation
         corpus = corpus.str.replace('[^\w\s]','')
@@ -75,7 +75,7 @@ class BagOfWords():
         # removing numbers
         if remove_numbers == True:
             remove_digits = str.maketrans('', '', digits)
-            print("3/3: Removing numbers\n")
+            print("\n3/3: Removing numbers")
             self.corpus = corpus.progress_apply(lambda x: x.translate(remove_digits))
         else:
             self.corpus = corpus   
@@ -88,7 +88,7 @@ class BagOfWords():
         
     
     def stemm(self):
-        print("\n\nCreating unigrams\n\n:")
+        print("\n\nCreating unigrams:")
         # stemming (Porter Stemmer)
         self.stems = [[PorterStemmer().stem(word) for word in doc] for doc in tqdm(self.tokens)]
         # removing stopwords from stems
@@ -99,7 +99,7 @@ class BagOfWords():
         self.unigrams_all = [item for sublist in self.unigrams for item in sublist]
         # check for bigrams        
         if self.ngram_length > 1:
-            print("\n\nCreating bigrams\n\n:")
+            print("\nCreating bigrams:")
             bigrams = []
             for d in tqdm(self.unigrams):
                 try:
@@ -113,7 +113,7 @@ class BagOfWords():
             self.bigrams_unadjust = bigrams.copy()       
     
     def lemmatize(self):
-        print("\n\nCreating unigrams\n\n:")
+        print("\nCreating unigrams:")
         # lemmatizing (WordNet Lemmatizer)
         self.lemmas = [[WordNetLemmatizer().lemmatize(word) for word in doc] for doc in tqdm(self.tokens)]
         # removing stopwords from stems
@@ -304,6 +304,7 @@ class BagOfWords():
             sp.plot([x[1] for x in unigram_type])
             plt.title(str(ftitle+" unigrams"))
             try:
+                bigram_type
                 sp2 = f.add_subplot(212)
                 sp2.plot([x[1] for x in bigram_type])
                 plt.title(str(ftitle+" bigrams"))
