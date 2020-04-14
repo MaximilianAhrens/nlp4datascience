@@ -61,7 +61,7 @@ class BagOfWords():
     def clean(self, remove_numbers=True):
         # removing stopwords (NLTK stopword list)
         self.stop_words = stopwords.words('english')+stopwords.words('french')+stopwords.words('german')+self.custom_stopwords
-        print("\n\1/3: Stopword removal")
+        print("\n1/3: Stopword removal")
         corpus = self.raw_data.progress_apply(lambda x: " ".join(x for x in x.split() if x not in self.stop_words))
         # lowercasing
         print("\n2/3: Lowercasing")
@@ -88,7 +88,7 @@ class BagOfWords():
         
     
     def stemm(self):
-        print("\n\nCreating unigrams:")
+        print("\nCreating unigrams:")
         # stemming (Porter Stemmer)
         self.stems = [[PorterStemmer().stem(word) for word in doc] for doc in tqdm(self.tokens)]
         # removing stopwords from stems
@@ -124,7 +124,7 @@ class BagOfWords():
         self.unigrams_all = [item for sublist in self.unigrams for item in sublist]
         # check for bigrams  
         if self.ngram_length > 1:
-            print("\n\nCreating bigrams\n\n:")
+            print("\nCreating bigrams:")
             bigrams = []
             for d in self.unigrams:
                 try:
@@ -227,24 +227,18 @@ class BagOfWords():
     def visualize(self, weight):
         if weight == "tf":
             unigram_type = self.unigrams_tf
-            try:
+            if hasattr(self,"bigrams_tf"):
                 bigram_type = self.bigrams_tf
-            except AttributeError:
-                pass
             ftitle = "term frequency ranking"
         if weight == "df":
             unigram_type = self.unigrams_df
-            try:
+            if hasattr(self,"bigrams_df"):
                 bigram_type = self.bigrams_df
-            except AttributeError:
-                pass
             ftitle = "document frequency ranking"
         if weight == "tf-idf":
             unigram_type = self.unigrams_tf_idf
-            try:
+            if hasattr(self,"bigrams_tf_idf"):
                 bigram_type = self.bigrams_tf_idf
-            except AttributeError:
-                pass
             ftitle = "tf-idf ranking"
             
         if self.ngram_length == 1:
@@ -259,36 +253,28 @@ class BagOfWords():
             sp = f.add_subplot(211)
             sp.plot([x[1] for x in unigram_type])
             plt.title(str(ftitle+" unigrams"))
-            try:
+            if hasattr(self,"bigrams_tf"):
                 sp2 = f.add_subplot(212)
                 sp2.plot([x[1] for x in bigram_type])
                 plt.title(str(ftitle+" bigrams"))
-            except UnboundLocalError:
-                pass
         return f
                 
 
     def visualize_adj(self, weight):
         if weight == "tf":
             unigram_type = self.unigrams_tf_adj
-            try:
+            if hasattr(self,"bigrams_tf_adj"):
                 bigram_type = self.bigrams_tf_adj
-            except AttributeError:
-                pass
             ftitle = "term frequency ranking"
         if weight == "df":
             unigram_type = self.unigrams_df_adj
-            try:
+            if hasattr(self,"bigrams_df_adj"):
                 bigram_type = self.bigrams_df_adj
-            except AttributeError:
-                pass
             ftitle = "document frequency ranking"
         if weight == "tf-idf":
             unigram_type = self.unigrams_tf_idf_adj
-            try:
+            if hasattr(self,"bigrams_tf_idf_adj"):
                 bigram_type = self.bigrams_tf_idf_adj
-            except AttributeError:
-                pass
             ftitle = "tf-idf ranking"                
             
         if self.ngram_length == 1:
@@ -303,27 +289,21 @@ class BagOfWords():
             sp = f.add_subplot(211)
             sp.plot([x[1] for x in unigram_type])
             plt.title(str(ftitle+" unigrams"))
-            try:
-                bigram_type
+            if hasattr(self,"bigrams_tf"):
                 sp2 = f.add_subplot(212)
                 sp2.plot([x[1] for x in bigram_type])
                 plt.title(str(ftitle+" bigrams"))
-            except UnboundLocalError:
-                pass
         return f
 
     def save(self, data_format, output_dir, file_name): # save preprocessed dataset
         results = pd.DataFrame()
         results["uni"] = self.unigrams_unadjust
         results["uni_adj"] = self.unigrams
-        
-        try:
+        if hasattr(self,"bigrams_tf"):
             len(self.bigrams)
             results["bi"] = self.bigrams_unadjust
             results["bi_adj"] = self.bigrams
-        except AttributeError:
-            pass
-            
+
         if data_format == "pkl":
             pickle_dump(results, output_dir + str(file_name + "." + data_format))
             print("File saved in pickle-format.")
