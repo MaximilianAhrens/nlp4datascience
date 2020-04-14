@@ -297,7 +297,7 @@ class BagOfWords():
             return f
 
 
-    def save(self, output_dir, file_name): # save preprocessed dataset
+    def save(self, output_dir, file_name, data_format ="pkl"): # save preprocessed dataset
         results = pd.DataFrame()
         results["uni"] = self.unigrams_unadjust
         results["uni_adj"] = self.unigrams
@@ -406,7 +406,7 @@ class DTM():
         self.create_dtm(self.ngrams)
         
         
-    def save(self, output_dir, file_name, data_format"pkl"): # save preprocessed dataset
+    def save(self, output_dir, file_name): # save preprocessed dataset
         def save(self, output_dir, file_name): # save preprocessed dataset
         scipy.sparse.save_npz(output_dir + "/" * file_name +"_dtm.npz", self.dtm)
         pd.Series(self.tokens).to_pickle(output_dir + "/" * file_name + "_tokens.pkl")
