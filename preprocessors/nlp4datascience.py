@@ -10,6 +10,7 @@ tqdm.pandas(desc="Progress:")
 from string import digits
 import itertools
 import collections
+import scipy.sparse
 import nltk
 try:
     nltk.data.find('corpora/wordnet.zip')
@@ -407,6 +408,9 @@ class DTM():
         
         
     def save(self, output_dir, file_name): # save preprocessed dataset
+    '''
+    input variables: output_dir, file_name
+    '''
         scipy.sparse.save_npz(output_dir + "/" * file_name +"_dtm.npz", self.dtm)
         pd.Series(self.tokens).to_pickle(output_dir + "/" * file_name + "_tokens.pkl")
         
