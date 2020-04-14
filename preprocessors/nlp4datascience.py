@@ -297,7 +297,7 @@ class BagOfWords():
             return f
 
 
-    def save(self, data_format, output_dir, file_name): # save preprocessed dataset
+    def save(self, output_dir, file_name, data_formt = "pkl"): # save preprocessed dataset
         results = pd.DataFrame()
         results["uni"] = self.unigrams_unadjust
         results["uni_adj"] = self.unigrams
@@ -405,20 +405,28 @@ class DTM():
                 ngrams_list[i] = ngram_model_final[doc]
             self.ngrams = ngrams_list
         self.create_dtm(self.ngrams)
+        
+    
+    def save
 
 
-    def sparsify(self, DTM, cut_off = 0.1):
-      '''
-      Make DTM sparser
-      '''
-      self.cut_off = cut_off
-      old_dict = DTM.sum(axis=0, skipna = True)
-      old_dict.sort_values(ascending = False, inplace = True)
-      cut_off_threshold = round(len(old_dict)*(1-cut_off))
-      new_dict = old_dict[:cut_off_threshold]
-      DTM_sparsified = DTM[new_dict.index]
-      return(DTM_sparsified)      
-  
+    def save(self, output_dir, file_name, data_format"pkl"): # save preprocessed dataset
+        results = pd.DataFrame()
+        results["uni"] = self.unigrams_unadjust
+        results["uni_adj"] = self.unigrams
+        if hasattr(self,"bigrams_tf"):
+            len(self.bigrams)
+            results["bi"] = self.bigrams_unadjust
+            results["bi_adj"] = self.bigrams
+
+        if data_format == "pkl":
+            pickle_dump(results, output_dir + str(file_name + "." + data_format))
+            print("File saved in pickle-format.")
+        if data_format == "csv":
+            results.to_csv(output_dir + str(file_name + "." + data_format), encoding="utf-8")
+            print("File saved in csv-format.")
+        if data_format != "pkl" and data_format != "csv":
+            print("ERROR: specified data-format not supported.")  
 
 
 # =============================================================================
