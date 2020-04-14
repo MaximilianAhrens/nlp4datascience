@@ -397,7 +397,7 @@ class DTM():
                 ngrams_list[i] = ngram_model_final[doc]
             self.ngrams = ngrams_list
         else:
-            self.bigram_dtm()
+            self.bigram_dtm(min_count=min_count, threshold=threshold)
             ngram_model = Phrases(self.bigrams, min_count=min_count, threshold=threshold, delimiter=b' ')
             ngram_model_final = Phraser(ngram_model)
             ngrams_list = [0]*self.raw_data.shape[0]
