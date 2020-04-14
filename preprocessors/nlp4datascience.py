@@ -297,7 +297,7 @@ class BagOfWords():
             return f
 
 
-    def save(self, output_dir, file_name, data_formt = "pkl"): # save preprocessed dataset
+    def save(self, output_dir, file_name): # save preprocessed dataset
         results = pd.DataFrame()
         results["uni"] = self.unigrams_unadjust
         results["uni_adj"] = self.unigrams
@@ -313,8 +313,7 @@ class BagOfWords():
             results.to_csv(output_dir + str(file_name + "." + data_format), encoding="utf-8")
             print("File saved in csv-format.")
         if data_format != "pkl" and data_format != "csv":
-            print("ERROR: specified data-format not supported.")
-
+            print("ERROR: specified data-format not supported.")  
                 
 # =============================================================================
 # Bag of Words: DTM
@@ -406,28 +405,12 @@ class DTM():
             self.ngrams = ngrams_list
         self.create_dtm(self.ngrams)
         
-    
-    def save
-
-
+        
     def save(self, output_dir, file_name, data_format"pkl"): # save preprocessed dataset
-        results = pd.DataFrame()
-        results["uni"] = self.unigrams_unadjust
-        results["uni_adj"] = self.unigrams
-        if hasattr(self,"bigrams_tf"):
-            len(self.bigrams)
-            results["bi"] = self.bigrams_unadjust
-            results["bi_adj"] = self.bigrams
-
-        if data_format == "pkl":
-            pickle_dump(results, output_dir + str(file_name + "." + data_format))
-            print("File saved in pickle-format.")
-        if data_format == "csv":
-            results.to_csv(output_dir + str(file_name + "." + data_format), encoding="utf-8")
-            print("File saved in csv-format.")
-        if data_format != "pkl" and data_format != "csv":
-            print("ERROR: specified data-format not supported.")  
-
+        def save(self, output_dir, file_name): # save preprocessed dataset
+        scipy.sparse.save_npz(output_dir + "/" * file_name +"_dtm.npz", self.dtm)
+        pd.Series(self.tokens).to_pickle(output_dir + "/" * file_name + "_tokens.pkl")
+        
 
 # =============================================================================
 # Word Vectors
