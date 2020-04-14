@@ -227,24 +227,18 @@ class BagOfWords():
     def visualize(self, weight):
         if weight == "tf":
             unigram_type = self.unigrams_tf
-            try:
+            if hasattr(self, "bigrams_tf"):
                 bigram_type = self.bigrams_tf
-            except AttributeError:
-                pass
             ftitle = "term frequency ranking"
         if weight == "df":
             unigram_type = self.unigrams_df
-            try:
+            if hasattr(self, "bigrams_df"):
                 bigram_type = self.bigrams_df
-            except AttributeError:
-                pass
             ftitle = "document frequency ranking"
         if weight == "tf-idf":
             unigram_type = self.unigrams_tf_idf
-            try:
+            if hasattr(self, "bigrams_tf_idf"):
                 bigram_type = self.bigrams_tf_idf
-            except AttributeError:
-                pass
             ftitle = "tf-idf ranking"
             
         if self.ngram_length == 1:
@@ -259,57 +253,47 @@ class BagOfWords():
             sp = f.add_subplot(211)
             sp.plot([x[1] for x in unigram_type])
             plt.title(str(ftitle+" unigrams"))
-            try:
+            if hasattr(self, "bigrams_tf"):
                 sp2 = f.add_subplot(212)
                 sp2.plot([x[1] for x in bigram_type])
                 plt.title(str(ftitle+" bigrams"))
-            except UnboundLocalError:
-                pass
-        return f
+            return f
                 
 
     def visualize_adj(self, weight):
         if weight == "tf":
             unigram_type = self.unigrams_tf_adj
-            try:
+            if hasattr(self, "bigrams_tf_adj"):
                 bigram_type = self.bigrams_tf_adj
-            except AttributeError:
-                pass
             ftitle = "term frequency ranking"
         if weight == "df":
             unigram_type = self.unigrams_df_adj
-            try:
+            if hasattr(self, "bigrams_df_adj"):
                 bigram_type = self.bigrams_df_adj
-            except AttributeError:
-                pass
             ftitle = "document frequency ranking"
         if weight == "tf-idf":
             unigram_type = self.unigrams_tf_idf_adj
-            try:
+            if hasattr(self, "bigrams_tf_idf_adj"):
                 bigram_type = self.bigrams_tf_idf_adj
-            except AttributeError:
-                pass
             ftitle = "tf-idf ranking"                
             
         if self.ngram_length == 1:
             f = plt.figure()
             f.suptitle(str(ftitle+" unigrams"))
             sp = f.add_subplot(111)
-            sp.plot([x[1] for x in unigram_type])
+            sp.plot([x[1] for x in unigram_type], color ="r")
             return f
           
         if self.ngram_length > 1:
             f = plt.figure()
             sp = f.add_subplot(211)
-            sp.plot([x[1] for x in unigram_type])
-            plt.title(str(ftitle+" unigrams"))
-            try:
+            sp.plot([x[1] for x in unigram_type],color ="r")
+            plt.title(str(ftitle+" unigrams after cut-off"))
+            if hasattr(self, "bigrams_tf"):
                 sp2 = f.add_subplot(212)
-                sp2.plot([x[1] for x in bigram_type])
-                plt.title(str(ftitle+" bigrams"))
-            except UnboundLocalError:
-                pass
-        return f
+                sp2.plot([x[1] for x in bigram_type],color ="r")
+                plt.title(str(ftitle+" bigrams after cut-off"))
+            return f
 
     def save(self, data_format, output_dir, file_name): # save preprocessed dataset
         results = pd.DataFrame()
@@ -344,7 +328,8 @@ class DTM():
     be used as inputs.
     
     raw_data has to be in form of "preprocessed_data.unigrams or 
-    preprecessed_data.bigrams". It needs to be "."-connected for R-input.
+    preprecessed_data.bigrams". It may need to be "."-connected 
+    if used as input in R.
     
     binDTM is either True or False. True creates an additional binary DTM.
     '''
