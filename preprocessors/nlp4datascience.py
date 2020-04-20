@@ -66,7 +66,7 @@ class BagOfWords():
         temp_corpus = pd.DataFrame([item for sublist in temp for item in enumerate(sublist)], columns=["sentence_id","sentence"])
         doc_id = [0]*len(temp_corpus)
         i = -1
-        for idx in range(len(temp_corpus)):
+        for idx in tqdm(range(len(temp_corpus))):
             if temp_corpus.sentence_id[idx] != 0:
                 doc_id[idx] = i
             else:
