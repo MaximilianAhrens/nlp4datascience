@@ -12,6 +12,7 @@ import itertools
 import collections
 import scipy.sparse
 import nltk
+import re
 try:
     nltk.data.find('corpora/wordnet.zip')
 except LookupError:
@@ -58,12 +59,31 @@ class BagOfWords():
           pass
         else:
           raise ValueError("invalid input for ngram_connector. ""."" or "","" allowed. ")
+          
+    def sentence_split(self):
+        # expression splits after puctuation and next word lowercase. This might be improved in future versions        
+        temp = [re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', x) for x in tqdm(self.raw_data)] 
+        temp_corpus = pd.DataFrame([item for sublist in tqdm(temp) for item in enumerate(sublist)], columns=["sentence_id","sentence"])
+        doc_id = [0]*len(temp_corpus)
+        i = -1
+        for idx in range(len(temp_corpus)):
+            if temp_corpus.sentence_id[idx] != 0:
+                doc_id[idx] = i
+            else:
+                i +=1
+                doc_id[idx] = i
+        temp_corpus["doc_id"] = doc_id
+        self.corpus_ssplit = temp_corpus[["doc_id","sentence_id","sentence"]]
     
-    def clean(self, remove_numbers=True):
+    def clean(self, remove_numbers=True):                        
         # removing stopwords (NLTK stopword list)
         self.stop_words = stopwords.words('english')+stopwords.words('french')+stopwords.words('german')+self.custom_stopwords
         print("\n1/3: Stopword removal")
-        corpus = self.raw_data.progress_apply(lambda x: " ".join(x for x in x.split() if x not in self.stop_words))
+        # check whether sentence-splitting occured
+        if hasattr(self,"corpus_ssplit"):
+            corpus = self.corpus_ssplit["sentence"].progress_apply(lambda x: " ".join(x for x in x.split() if x not in self.stop_words))
+        else:
+            corpus = self.raw_data.progress_apply(lambda x: " ".join(x for x in x.split() if x not in self.stop_words))
         # lowercasing
         print("\n2/3: Lowercasing")
         corpus = corpus.progress_apply(lambda x: " ".join(x.lower() for x in x.split())) 
