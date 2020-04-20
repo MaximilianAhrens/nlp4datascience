@@ -63,7 +63,7 @@ class BagOfWords():
     def sentence_split(self):
         # expression splits after puctuation and next word lowercase. This might be improved in future versions        
         temp = [re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', x) for x in tqdm(self.raw_data)] 
-        temp_corpus = pd.DataFrame([item for sublist in tqdm(temp) for item in enumerate(sublist)], columns=["sentence_id","sentence"])
+        temp_corpus = pd.DataFrame([item for sublist in temp for item in enumerate(sublist)], columns=["sentence_id","sentence"])
         doc_id = [0]*len(temp_corpus)
         i = -1
         for idx in range(len(temp_corpus)):
