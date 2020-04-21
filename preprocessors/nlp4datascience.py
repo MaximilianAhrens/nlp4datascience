@@ -320,6 +320,9 @@ class BagOfWords():
 
     def save(self, output_dir, file_name, data_format ="pkl"): # save preprocessed dataset
         results = pd.DataFrame()
+        if hasattr(self, "corpus_ssplit"):
+            results["doc_id"] = self.corpus_ssplit["doc_id"]
+            results["sentence_id"] = self.corpus_ssplit["sentence_id"]
         results["uni"] = self.unigrams_unadjust
         results["uni_adj"] = self.unigrams
         if hasattr(self,"bigrams_tf"):
