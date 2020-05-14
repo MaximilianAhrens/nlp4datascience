@@ -199,10 +199,10 @@ class BagOfWords():
                                      key=lambda x: x[1], reverse=True)
           
     
-    def rank_remove(self, rank, items, cutoff):
+    def remove_tokens(self, weight, items, cutoff):
         
         """
-        remove tokens or stems (specified in items) based on rank's ('tf',
+        remove tokens or stems (specified in items) based on weight's ('tf',
         'tfidf', or 'df' value being less than cutoff to remove all words with rank R or
         less, specify cutoff = self.xxx_ranking[R][1]
         """
@@ -211,11 +211,11 @@ class BagOfWords():
             return [t for t in tokens if t not in to_remove]
                    
         if items == "uni":
-            if rank == "tf":
+            if weight == "tf":
                 to_remove = set([t[0] for t in self.unigrams_tf if t[1] <= cutoff])
-            elif rank == "tf-idf":
+            elif weight == "tf-idf":
                 to_remove = set([t[0] for t in self.unigrams_tf_idf if t[1] <= cutoff])
-            elif rank == "df":
+            elif weight == "df":
                 to_remove = set([t[0] for t in self.unigrams_df if t[1] <= cutoff])
             self.unigrams = list(map(remove, self.unigrams))
             self.unigrams_tf_adj = [t for t in self.unigrams_tf if t[0] not in to_remove]
@@ -230,11 +230,11 @@ class BagOfWords():
             print("Total number of all unigrams after document-occurance cut-off:", len(self.unigrams_all_adj))
 
         if items == "bi":
-            if rank == "tf":
+            if weight == "tf":
                 to_remove = set([t[0] for t in self.bigrams_tf if t[1] <= cutoff])
-            elif rank == "tf-idf":
+            elif weight == "tf-idf":
                 to_remove = set([t[0] for t in self.bigrams_tf_idf if t[1] <= cutoff])
-            elif rank == "df":
+            elif weight == "df":
                 to_remove = set([t[0] for t in self.bigrams_df if t[1] <= cutoff])    
             self.bigrams = list(map(remove, self.bigrams))
             self.bigrams_tf_adj = [t for t in self.bigrams_tf if t[0] not in to_remove]
