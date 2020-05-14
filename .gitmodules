@@ -1,9 +1,0 @@
-[submodule "btr"]
-	path = btr
-	url = https://bitbucket.org/maxahrens/topic_models/src/master/btr
-[submodule "topicmodels"]
-	path = topicmodels
-	url = https://bitbucket.org/maxahrens/topic_models/src/master/topicmodels/
-[submodule "topic_models"]
-	path = topic_models
-	url = https://maxahrens@bitbucket.org/maxahrens/topic_models.git
