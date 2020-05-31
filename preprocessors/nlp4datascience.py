@@ -37,6 +37,7 @@ sns.set(style="darkgrid")
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+
 # =============================================================================
 # Bag of Words
 # =============================================================================
@@ -49,6 +50,7 @@ class BagOfWords():
     '''
     
     def __init__(self, raw_data, min_length = 1 , ngram_length = 1, ngram_connector = "."):
+        self.version = "last update: 31 May 2020"
         self.min_length = min_length
         self.ngram_length = ngram_length
         self.ngram_connector = ngram_connector
@@ -165,7 +167,7 @@ class BagOfWords():
     def ngrams(self, ngram_type):
         if ngram_type == "unigrams":
             ngram_list = self.unigrams
-        if ngram_type == "bigrams":
+        elif ngram_type == "bigrams":
             ngram_list = self.bigrams
 
         def tf_idf_compute(t):
@@ -207,7 +209,7 @@ class BagOfWords():
             self.bigrams_tf_idf_adj = self.bigrams_tf_idf.copy()
           
     
-    def remove_tokens(self, weight, items, cutoff):
+    def remove_tokens(self, weight, items, cutoff_min, cutoff_max=False):
         
         """
         remove tokens or stems (specified in items) based on weight's ('tf',
@@ -220,16 +222,22 @@ class BagOfWords():
                    
         if items == "uni":
             if weight == "tf":
-                to_remove = set([t[0] for t in self.unigrams_tf_adj if t[1] <= cutoff])
-            elif weight == "tf-idf":
-                to_remove = set([t[0] for t in self.unigrams_tf_idf_adj if t[1] <= cutoff])
-            elif weight == "df":
-                to_remove = set([t[0] for t in self.unigrams_df_adj if t[1] <= cutoff])
+                metric = self.unigrams_tf_adj
+            elif weight == "tf-idf":    
+                metric = self.unigrams_tf_idf_adj
+            elif weight == "df":    
+                metric = self.unigrams_df_adj  
+            
+            to_remove = set()
+            if cutoff_min != False:
+                to_remove.update(set([t[0] for t in metric if t[1] <= cutoff_min]))
+            if cutoff_max != False:
+                to_remove.update(set([t[0] for t in metric if t[1] >= cutoff_max]))
+  
             self.unigrams = list(map(remove, self.unigrams))
             self.unigrams_tf_adj = [t for t in self.unigrams_tf_adj if t[0] not in to_remove]
             self.unigrams_df_adj = [t for t in self.unigrams_df_adj if t[0] not in to_remove]
             self.unigrams_tf_idf_adj = [t for t in self.unigrams_tf_idf_adj if t[0] not in to_remove]
-            
             print("Total number of all unique unigrams:", len(set(self.unigrams_all)))
             print("Total number of all unigrams:", len(self.unigrams_all))
               
@@ -237,18 +245,24 @@ class BagOfWords():
             print("Total number of all unique unigrams after document-occurance cut-off:", len(set(self.unigrams_all_adj)))
             print("Total number of all unigrams after document-occurance cut-off:", len(self.unigrams_all_adj))
 
-        if items == "bi":
+        elif items == "bi":
             if weight == "tf":
-                to_remove = set([t[0] for t in self.bigrams_tf_adj if t[1] <= cutoff])
-            elif weight == "tf-idf":
-                to_remove = set([t[0] for t in self.bigrams_tf_idf_adj if t[1] <= cutoff])
-            elif weight == "df":
-                to_remove = set([t[0] for t in self.bigrams_df_adj if t[1] <= cutoff])    
+                metric = self.bigrams_tf_adj
+            elif weight == "tf-idf":    
+                metric = self.bigrams_tf_idf_adj
+            elif weight == "df":    
+                metric = self.bigrams_df_adj  
+                
+            to_remove = set()
+            if cutoff_min != False:
+                to_remove.update(set([t[0] for t in metric if t[1] <= cutoff_min]))
+            if cutoff_max != False:
+                to_remove.update(set([t[0] for t in metric if t[1] >= cutoff_max]))
+                 
             self.bigrams = list(map(remove, self.bigrams))
             self.bigrams_tf_adj = [t for t in self.bigrams_tf_adj if t[0] not in to_remove]
             self.bigrams_df_adj = [t for t in self.bigrams_df_adj if t[0] not in to_remove]
-            self.bigrams_tf_idf_adj = [t for t in self.bigrams_tf_idf_adj if t[0] not in to_remove]
-            
+            self.bigrams_tf_idf_adj = [t for t in self.bigrams_tf_idf_adj if t[0] not in to_remove]    
             print("Total number of all unique bigrams:", len(set(self.bigrams_all)))
             print("Total number of all bigrams:", len(self.bigrams_all))
             
@@ -279,7 +293,8 @@ class BagOfWords():
             f.suptitle(str(ftitle+" unigrams"))
             sp = f.add_subplot(111)
             sp.plot([x[1] for x in unigram_type])
-            return f
+            plt.show()
+            
           
         elif self.ngram_length > 1:
             f = plt.figure(figsize = (14,8))
@@ -290,7 +305,7 @@ class BagOfWords():
                 sp2 = f.add_subplot(212)
                 sp2.plot([x[1] for x in bigram_type])
                 plt.title(str(ftitle+" bigrams"))
-            return f
+                plt.show()
                 
 
     def visualize_adj(self, weight):
@@ -311,11 +326,11 @@ class BagOfWords():
             ftitle = "tf-idf ranking"                
             
         if self.ngram_length == 1:
-            f3 = plt.figure()
-            f3.suptitle(str(ftitle+" unigrams"))
-            sp = f3.add_subplot(111)
+            f = plt.figure()
+            f.suptitle(str(ftitle+" unigrams"))
+            sp = f.add_subplot(111)
             sp.plot([x[1] for x in unigram_type], color ="r")
-            return f3
+            plt.show()
           
         elif self.ngram_length > 1:
             f = plt.figure()
@@ -327,7 +342,7 @@ class BagOfWords():
                 sp2 = f.add_subplot(212)
                 sp2.plot([x[1] for x in bigram_type],color ="r")
                 plt.title(str(ftitle+" bigrams after cut-off"))
-            return f
+            plt.show()
 
 
     def save(self, output_dir, file_name, data_format ="pkl"): # save preprocessed dataset
