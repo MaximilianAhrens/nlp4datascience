@@ -190,6 +190,10 @@ class BagOfWords():
                                      key=lambda x: x[1], reverse=True)
             self.unigrams_df = sorted(zip(unique_tokens, unsorted_df),
                                          key=lambda x: x[1], reverse=True)
+            self.unigrams_tf_adj = self.unigrams_tf.copy()
+            self.unigrams_df_adj = self.unigrams_df.copy()
+            self.unigrams_tf_idf_adj = self.unigrams_tf_idf.copy()
+            
         if ngram_type == "bigrams":
             self.bigrams_tf = sorted(zip(unique_tokens, unsorted_tf),
                                      key=lambda x: x[1], reverse=True)
@@ -197,6 +201,10 @@ class BagOfWords():
                                      key=lambda x: x[1], reverse=True)
             self.bigrams_df = sorted(zip(unique_tokens, unsorted_df),
                                      key=lambda x: x[1], reverse=True)
+            
+            self.bigrams_tf_adj = self.bigrams_tf.copy()
+            self.bigrams_df_adj = self.bigrams_df.copy()
+            self.bigrams_tf_idf_adj = self.bigrams_tf_idf.copy()
           
     
     def remove_tokens(self, weight, items, cutoff):
@@ -212,15 +220,15 @@ class BagOfWords():
                    
         if items == "uni":
             if weight == "tf":
-                to_remove = set([t[0] for t in self.unigrams_tf if t[1] <= cutoff])
+                to_remove = set([t[0] for t in self.unigrams_tf_adj if t[1] <= cutoff])
             elif weight == "tf-idf":
-                to_remove = set([t[0] for t in self.unigrams_tf_idf if t[1] <= cutoff])
+                to_remove = set([t[0] for t in self.unigrams_tf_idf_adj if t[1] <= cutoff])
             elif weight == "df":
-                to_remove = set([t[0] for t in self.unigrams_df if t[1] <= cutoff])
+                to_remove = set([t[0] for t in self.unigrams_df_adj if t[1] <= cutoff])
             self.unigrams = list(map(remove, self.unigrams))
-            self.unigrams_tf_adj = [t for t in self.unigrams_tf if t[0] not in to_remove]
-            self.unigrams_df_adj = [t for t in self.unigrams_df if t[0] not in to_remove]
-            self.unigrams_tf_idf_adj = [t for t in self.unigrams_tf_idf if t[0] not in to_remove]
+            self.unigrams_tf_adj = [t for t in self.unigrams_tf_adj if t[0] not in to_remove]
+            self.unigrams_df_adj = [t for t in self.unigrams_df_adj if t[0] not in to_remove]
+            self.unigrams_tf_idf_adj = [t for t in self.unigrams_tf_idf_adj if t[0] not in to_remove]
             
             print("Total number of all unique unigrams:", len(set(self.unigrams_all)))
             print("Total number of all unigrams:", len(self.unigrams_all))
@@ -231,15 +239,15 @@ class BagOfWords():
 
         if items == "bi":
             if weight == "tf":
-                to_remove = set([t[0] for t in self.bigrams_tf if t[1] <= cutoff])
+                to_remove = set([t[0] for t in self.bigrams_tf_adj if t[1] <= cutoff])
             elif weight == "tf-idf":
-                to_remove = set([t[0] for t in self.bigrams_tf_idf if t[1] <= cutoff])
+                to_remove = set([t[0] for t in self.bigrams_tf_idf_adj if t[1] <= cutoff])
             elif weight == "df":
-                to_remove = set([t[0] for t in self.bigrams_df if t[1] <= cutoff])    
+                to_remove = set([t[0] for t in self.bigrams_df_adj if t[1] <= cutoff])    
             self.bigrams = list(map(remove, self.bigrams))
-            self.bigrams_tf_adj = [t for t in self.bigrams_tf if t[0] not in to_remove]
-            self.bigrams_df_adj = [t for t in self.bigrams_df if t[0] not in to_remove]
-            self.bigrams_tf_idf_adj = [t for t in self.bigrams_tf_idf if t[0] not in to_remove]
+            self.bigrams_tf_adj = [t for t in self.bigrams_tf_adj if t[0] not in to_remove]
+            self.bigrams_df_adj = [t for t in self.bigrams_df_adj if t[0] not in to_remove]
+            self.bigrams_tf_idf_adj = [t for t in self.bigrams_tf_idf_adj if t[0] not in to_remove]
             
             print("Total number of all unique bigrams:", len(set(self.bigrams_all)))
             print("Total number of all bigrams:", len(self.bigrams_all))
@@ -255,12 +263,12 @@ class BagOfWords():
             if hasattr(self,"bigrams_tf"):
                 bigram_type = self.bigrams_tf
             ftitle = "term frequency ranking"
-        if weight == "df":
+        elif weight == "df":
             unigram_type = self.unigrams_df
             if hasattr(self,"bigrams_df"):
                 bigram_type = self.bigrams_df
             ftitle = "document frequency ranking"
-        if weight == "tf-idf":
+        elif weight == "tf-idf":
             unigram_type = self.unigrams_tf_idf
             if hasattr(self,"bigrams_tf_idf"):
                 bigram_type = self.bigrams_tf_idf
@@ -273,7 +281,7 @@ class BagOfWords():
             sp.plot([x[1] for x in unigram_type])
             return f
           
-        if self.ngram_length > 1:
+        elif self.ngram_length > 1:
             f = plt.figure(figsize = (14,8))
             sp = f.add_subplot(211)
             sp.plot([x[1] for x in unigram_type])
@@ -282,7 +290,7 @@ class BagOfWords():
                 sp2 = f.add_subplot(212)
                 sp2.plot([x[1] for x in bigram_type])
                 plt.title(str(ftitle+" bigrams"))
-        return f
+            return f
                 
 
     def visualize_adj(self, weight):
@@ -291,25 +299,25 @@ class BagOfWords():
             if hasattr(self,"bigrams_tf_adj"):
                 bigram_type = self.bigrams_tf_adj
             ftitle = "term frequency ranking"
-        if weight == "df":
+        elif weight == "df":
             unigram_type = self.unigrams_df_adj
             if hasattr(self,"bigrams_df_adj"):
                 bigram_type = self.bigrams_df_adj
             ftitle = "document frequency ranking"
-        if weight == "tf-idf":
+        elif weight == "tf-idf":
             unigram_type = self.unigrams_tf_idf_adj
             if hasattr(self,"bigrams_tf_idf_adj"):
                 bigram_type = self.bigrams_tf_idf_adj
             ftitle = "tf-idf ranking"                
             
         if self.ngram_length == 1:
-            f = plt.figure()
-            f.suptitle(str(ftitle+" unigrams"))
-            sp = f.add_subplot(111)
+            f3 = plt.figure()
+            f3.suptitle(str(ftitle+" unigrams"))
+            sp = f3.add_subplot(111)
             sp.plot([x[1] for x in unigram_type], color ="r")
-            return f
+            return f3
           
-        if self.ngram_length > 1:
+        elif self.ngram_length > 1:
             f = plt.figure()
             sp = f.add_subplot(211)
 
